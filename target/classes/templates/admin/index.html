@@ -30,6 +30,12 @@
                         <h3 class="card-title">新闻菜单</h3>
                     </div> <!-- /.card-body -->
                     <div class="card-body">
+                        <button class="btn btn-success" onclick="exportNews()"><i
+                                class="fa fa-compress"></i>&nbsp;导出
+                        </button>
+                        <button class="btn btn-success" onclick="reload()"><i
+                                class="fa fa-refresh"></i>&nbsp;刷新
+                        </button>
                         <!-- JqGrid必要DOM,用于创建表格展示列表数据 -->
                         <table id="jqGrid" class="table table-bordered"></table>
                         <!-- JqGrid必要DOM,分页信息区域 -->

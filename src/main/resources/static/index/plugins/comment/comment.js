@@ -28,12 +28,12 @@ $('#commentSubmit').click(function () {
         return;
     }
     var data = {
-        "newsId": newsId, "verifyCode": verifyCode, "commentator": commentator,"commentBody": commentBody
+        "newsId": newsId, "verifyCode": verifyCode, "commentator": commentator, "commentBody": commentBody
     };
     console.log(data);
     $.ajax({
         type: 'POST',//方法类型
-        url: '/news/comment',
+        url: '/admin/detail/news/comment',
         data: data,
         success: function (result) {
             if (result.resultCode == 200) {
@@ -42,8 +42,7 @@ $('#commentSubmit').click(function () {
                 });
                 $('#commentBody').val('');
                 $('#verifyCode').val('');
-            }
-            else {
+            } else {
                 swal(result.message, {
                     icon: "error",
                 });

@@ -17,28 +17,42 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 
 
-@Controller
+@Controller()
+@RequestMapping("/admin/detail")
 public class IndexController {
     @Resource
     private CommentService commentService;
     @Resource
     private NewsService newsService;
 
+
     /**
      * 详情页
      * @return
      */
-    @GetMapping({"/admin/index/{newsId}"})
+    @GetMapping({"/{newsId}"})
     public String detail(HttpServletRequest request, @PathVariable("newsId") Long newsId) {
         News newsDetail = newsService.queryNewsById(newsId);
         if (newsDetail != null) {
             request.setAttribute("newsDetail", newsDetail);
             request.setAttribute("pageName", "详情");
+            /*浏览量加一*/
             return "index/detail";
         } else {
             return "error/error_404";
         }
 
+    }
+
+
+    @PostMapping("/news/export")
+    @ResponseBody
+    public Result exportNews(@RequestBody Integer[] ids) {
+        if (newsService.deleteBatch(ids)) {
+            return ResultGenerator.genSuccessResult();
+        } else {
+            return ResultGenerator.genFailResult("删除失败");
+        }
     }
 
     /**

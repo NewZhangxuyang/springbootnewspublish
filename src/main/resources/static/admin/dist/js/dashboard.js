@@ -71,7 +71,7 @@ function detailNews() {
     if (id == null) {
         return;
     }
-    window.open("/admin/index/" + id, "_blank");
+    window.open("/admin/detail/" + id, "_blank");
 }
 
 function praiseNews() {
@@ -96,23 +96,23 @@ function getNowRow() {
 }
 
 
-function deleteNews() {
+function exportNews() {
     var ids = getSelectedRows();
     if (ids == null) {
         return;
     }
     swal({
-        title: "确认弹框", text: "确认要删除数据吗?", icon: "warning", buttons: true, dangerMode: true,
+        title: "确认弹框", text: "确认要导出数据吗?", icon: "success", buttons: true, dangerMode: true,
     }).then((flag) => {
         if (flag) {
             $.ajax({
                 type: "POST",
-                url: "/admin/news/delete",
+                url: "/admin/detail/news/export",
                 contentType: "application/json",
                 data: JSON.stringify(ids),
                 success: function (r) {
                     if (r.resultCode == 200) {
-                        swal("删除成功", {
+                        swal("导出成功", {
                             icon: "success",
                         });
                         $("#jqGrid").trigger("reloadGrid");
