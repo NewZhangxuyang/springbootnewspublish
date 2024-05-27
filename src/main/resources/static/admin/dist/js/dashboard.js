@@ -75,11 +75,28 @@ function detailNews() {
 }
 
 function praiseNews() {
-    var data = getNowRow();
-    var id = data.newsId;
-    if (id == null) {
+    var ids = getSelectedRows();
+    if (ids == null) {
         return;
     }
+    $.ajax({
+        type: "POST",
+        url: "/admin/detail/news/praise",
+        contentType: "application/json",
+        data: JSON.stringify(ids),
+        success: function (r) {
+            if (r.resultCode == 200) {
+                swal("点赞成功", {
+                    icon: "success",
+                });
+                $("#jqGrid").trigger("reloadGrid");
+            } else {
+                swal(r.message, {
+                    icon: "error",
+                });
+            }
+        }
+    });
 }
 
 function getNowRow() {

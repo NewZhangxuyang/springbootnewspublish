@@ -28,6 +28,7 @@ public class IndexController {
 
     /**
      * 详情页
+     *
      * @return
      */
     @GetMapping({"/{newsId}"})
@@ -36,7 +37,11 @@ public class IndexController {
         if (newsDetail != null) {
             request.setAttribute("newsDetail", newsDetail);
             request.setAttribute("pageName", "详情");
-            /*浏览量加一*/
+            /*
+
+            浏览量加一
+
+            */
             return "index/detail";
         } else {
             return "error/error_404";
@@ -48,6 +53,17 @@ public class IndexController {
     @PostMapping("/news/export")
     @ResponseBody
     public Result exportNews(@RequestBody Integer[] ids) {
+        if (newsService.deleteBatch(ids)) {
+            return ResultGenerator.genSuccessResult();
+        } else {
+            return ResultGenerator.genFailResult("删除失败");
+        }
+    }
+
+
+    @PostMapping("/news/praise")
+    @ResponseBody
+    public Result praiseNews(@RequestBody Integer[] ids) {
         if (newsService.deleteBatch(ids)) {
             return ResultGenerator.genSuccessResult();
         } else {
