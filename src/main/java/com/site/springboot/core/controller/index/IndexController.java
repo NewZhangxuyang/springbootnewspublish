@@ -26,10 +26,9 @@ public class IndexController {
 
     /**
      * 详情页
-     *
      * @return
      */
-    @GetMapping({"/news/{newsId}"})
+    @GetMapping({"/admin/index/{newsId}"})
     public String detail(HttpServletRequest request, @PathVariable("newsId") Long newsId) {
         News newsDetail = newsService.queryNewsById(newsId);
         if (newsDetail != null) {
