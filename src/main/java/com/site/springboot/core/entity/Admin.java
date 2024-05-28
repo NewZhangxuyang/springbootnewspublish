@@ -1,54 +1,44 @@
 package com.site.springboot.core.entity;
 
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity(name = "tb_admin_user")
 public class Admin {
+    @Setter
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "admin_id")
     private Long adminId;
 
+    @Column(name = "login_name")
     private String loginName;
 
+    @Column(name = "login_password")
     private String loginPassword;
 
+    @Column(name = "admin_nick_name")
     private String adminNickName;
 
+    @Setter
+    @Column(name = "locked")
     private Byte locked;
-
-    public Long getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(Long adminId) {
-        this.adminId = adminId;
-    }
-
-    public String getLoginName() {
-        return loginName;
-    }
 
     public void setLoginName(String loginName) {
         this.loginName = loginName == null ? null : loginName.trim();
-    }
-
-    public String getLoginPassword() {
-        return loginPassword;
     }
 
     public void setLoginPassword(String loginPassword) {
         this.loginPassword = loginPassword == null ? null : loginPassword.trim();
     }
 
-    public String getAdminNickName() {
-        return adminNickName;
-    }
-
     public void setAdminNickName(String adminNickName) {
         this.adminNickName = adminNickName == null ? null : adminNickName.trim();
-    }
-
-    public Byte getLocked() {
-        return locked;
-    }
-
-    public void setLocked(Byte locked) {
-        this.locked = locked;
     }
 
     @Override

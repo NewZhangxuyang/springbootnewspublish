@@ -1,14 +1,18 @@
 package com.site.springboot.core.service.impl;
 
+import com.site.springboot.core.config.Constants;
 import com.site.springboot.core.dao.NewsCategoryMapper;
 import com.site.springboot.core.entity.NewsCategory;
 import com.site.springboot.core.service.CategoryService;
 import com.site.springboot.core.util.PageQueryUtil;
 import com.site.springboot.core.util.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -18,53 +22,54 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<NewsCategory> getAllCategories() {
-        return newsCategoryMapper.findCategoryList(null);
+        return newsCategoryMapper.findAllByIsDeleted(Constants.Delete_Flag_Exist);
     }
 
     @Override
     public NewsCategory queryById(Long id) {
-        return newsCategoryMapper.selectByPrimaryKey(id);
+        return newsCategoryMapper.findNewsCategoryByCategoryId(id);
     }
 
     @Override
     public PageResult getCategoryPage(PageQueryUtil pageUtil) {
-        List<NewsCategory> categoryList = newsCategoryMapper.findCategoryList(pageUtil);
-        int total = newsCategoryMapper.getTotalCategories(pageUtil);
-        PageResult pageResult = new PageResult(categoryList, total, pageUtil.getLimit(), pageUtil.getPage());
-        return pageResult;
+        PageRequest pageResult = PageRequest.of(pageUtil.getPage() - 1, pageUtil.getLimit());
+        List<NewsCategory> categoryList = newsCategoryMapper.findAllByIsDeleted(Constants.Delete_Flag_Exist, pageResult).getContent();
+        int total = newsCategoryMapper.countAllNewsCategoryByIsDeleted(Constants.Delete_Flag_Exist);
+        return new PageResult(categoryList, total, pageUtil.getLimit(), pageUtil.getPage());
     }
 
     @Override
     public Boolean saveCategory(String categoryName) {
-        /**
-         * 查询是否已存在
-         */
-        NewsCategory temp = newsCategoryMapper.selectByCategoryName(categoryName);
+        NewsCategory temp = newsCategoryMapper.findNewsCategoryByCategoryName(categoryName);
         if (temp == null) {
             NewsCategory newsCategory = new NewsCategory();
             newsCategory.setCategoryName(categoryName);
-            return newsCategoryMapper.insertSelective(newsCategory) > 0;
+            newsCategory.setIsDeleted(Constants.Delete_Flag_Exist);
+            return !Objects.isNull(newsCategoryMapper.save(newsCategory));
         }
         return false;
     }
 
     @Override
     public Boolean updateCategory(Long categoryId, String categoryName) {
-        NewsCategory newsCategory = newsCategoryMapper.selectByPrimaryKey(categoryId);
+        NewsCategory newsCategory = newsCategoryMapper.findNewsCategoryByCategoryId(categoryId);
         if (newsCategory != null) {
             newsCategory.setCategoryName(categoryName);
-            return newsCategoryMapper.updateByPrimaryKeySelective(newsCategory) > 0;
+            return !Objects.isNull(newsCategoryMapper.save(newsCategory));
         }
         return false;
     }
 
     @Override
-    public Boolean deleteBatchByIds(Integer[] ids) {
+    public Boolean deleteBatchByIds(Long[] ids) {
         if (ids.length < 1) {
             return false;
         }
-        //删除分类数据
-        return newsCategoryMapper.deleteBatch(ids) > 0;
+        List<NewsCategory> lists = newsCategoryMapper.findAllById(Arrays.asList(ids)).stream().peek(newsCategory -> {
+            newsCategory.setIsDeleted(Constants.Delete_Flag_Delete);
+        }).toList();
+        newsCategoryMapper.saveAll(lists);
+        return true;
     }
 
 }

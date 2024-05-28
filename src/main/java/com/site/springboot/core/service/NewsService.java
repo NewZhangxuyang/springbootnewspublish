@@ -9,7 +9,7 @@ public interface NewsService {
 
     PageResult getNewsPage(PageQueryUtil pageUtil);
 
-    Boolean deleteBatch(Integer[] ids);
+    Boolean deleteBatch(Long[] ids);
 
     /**
      * 根据id获取详情

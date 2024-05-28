@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
 import java.util.Map;
 
 
@@ -30,7 +31,7 @@ public class CommentController {
     @GetMapping("/comments/list")
     @ResponseBody
     public Result list(@RequestParam Map<String, Object> params) {
-        
+
         if (ObjectUtils.isEmpty(params.get("page")) || ObjectUtils.isEmpty(params.get("limit"))) {
             return ResultGenerator.genFailResult("参数异常！");
         }
@@ -40,7 +41,7 @@ public class CommentController {
 
     @PostMapping("/comments/checkDone")
     @ResponseBody
-    public Result checkDone(@RequestBody Integer[] ids) {
+    public Result checkDone(@RequestBody Long[] ids) {
         if (ids.length < 1) {
             return ResultGenerator.genFailResult("参数异常！");
         }
@@ -53,7 +54,7 @@ public class CommentController {
 
     @PostMapping("/comments/delete")
     @ResponseBody
-    public Result delete(@RequestBody Integer[] ids) {
+    public Result delete(@RequestBody Long[] ids) {
         if (ids.length < 1) {
             return ResultGenerator.genFailResult("参数异常！");
         }

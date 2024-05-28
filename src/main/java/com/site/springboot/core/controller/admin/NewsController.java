@@ -136,7 +136,7 @@ public class NewsController {
 
     @PostMapping("/news/delete")
     @ResponseBody
-    public Result delete(@RequestBody Integer[] ids) {
+    public Result delete(@RequestBody Long[] ids) {
         if (ids.length < 1) {
             return ResultGenerator.genFailResult("参数异常！");
         }

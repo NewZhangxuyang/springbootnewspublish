@@ -1,28 +1,19 @@
 package com.site.springboot.core.dao;
 
 import com.site.springboot.core.entity.News;
-import com.site.springboot.core.util.PageQueryUtil;
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import java.util.List;
 
-@Component
-public interface NewsMapper {
-    int deleteByPrimaryKey(Long newsId);
 
-    int insert(News record);
+public interface NewsMapper extends JpaRepository<News, Long>, QuerydslPredicateExecutor<News> {
 
-    int insertSelective(News record);
+    News findNewByNewsId(Long newsId);
 
-    News selectByPrimaryKey(Long newsId);
+    int countAllByIsDeleted(Byte isDeleted);
 
-    int updateByPrimaryKeySelective(News record);
-
-    int updateByPrimaryKey(News record);
-
-    List<News> findNewsList(PageQueryUtil pageUtil);
-
-    int getTotalNews(PageQueryUtil pageUtil);
-
-    int deleteBatch(Integer[] ids);
+    Page<News> findAllByIsDeleted(Byte isDeleted, Pageable page);
 }

@@ -1,79 +1,59 @@
 package com.site.springboot.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Entity(name = "tb_news_comment")
 public class NewsComment {
+    @Setter
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "comment_id")
     private Long commentId;
 
+    @Setter
+    @Column(name = "news_id")
     private Long newsId;
 
+    @Column(name = "commentator")
     private String commentator;
 
+    @Column(name = "comment_body")
     private String commentBody;
 
+    @Setter
+    @Column(name = "comment_status")
     private Byte commentStatus;
 
+    @Setter
+    @Column(name = "is_deleted")
     private Byte isDeleted;
 
+    @Setter
+    @Column(name = "create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @CreationTimestamp
     private Date createTime;
-
-    public Long getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
-    }
-
-    public Long getNewsId() {
-        return newsId;
-    }
-
-    public void setNewsId(Long newsId) {
-        this.newsId = newsId;
-    }
-
-    public String getCommentator() {
-        return commentator;
-    }
 
     public void setCommentator(String commentator) {
         this.commentator = commentator == null ? null : commentator.trim();
     }
 
-    public String getCommentBody() {
-        return commentBody;
-    }
-
     public void setCommentBody(String commentBody) {
         this.commentBody = commentBody == null ? null : commentBody.trim();
-    }
-
-    public Byte getCommentStatus() {
-        return commentStatus;
-    }
-
-    public void setCommentStatus(Byte commentStatus) {
-        this.commentStatus = commentStatus;
-    }
-
-    public Byte getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Byte isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
     }
 
     @Override

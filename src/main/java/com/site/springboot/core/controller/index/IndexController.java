@@ -52,7 +52,7 @@ public class IndexController {
 
     @PostMapping("/news/export")
     @ResponseBody
-    public Result exportNews(@RequestBody Integer[] ids) {
+    public Result exportNews(@RequestBody Long[] ids) {
         if (newsService.deleteBatch(ids)) {
             return ResultGenerator.genSuccessResult();
         } else {
@@ -63,7 +63,7 @@ public class IndexController {
 
     @PostMapping("/news/praise")
     @ResponseBody
-    public Result praiseNews(@RequestBody Integer[] ids) {
+    public Result praiseNews(@RequestBody Long[] ids) {
         if (newsService.deleteBatch(ids)) {
             return ResultGenerator.genSuccessResult();
         } else {

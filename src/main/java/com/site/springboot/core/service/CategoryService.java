@@ -43,6 +43,6 @@ public interface CategoryService {
      * @param ids
      * @return
      */
-    Boolean deleteBatchByIds(Integer[] ids);
+    Boolean deleteBatchByIds(Long[] ids);
 
 }

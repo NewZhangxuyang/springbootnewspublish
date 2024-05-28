@@ -1,31 +1,27 @@
 package com.site.springboot.core.dao;
 
 import com.site.springboot.core.entity.NewsCategory;
+import com.site.springboot.core.entity.NewsComment;
 import com.site.springboot.core.util.PageQueryUtil;
+import com.site.springboot.core.util.PageResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-public interface NewsCategoryMapper {
+public interface NewsCategoryMapper extends JpaRepository<NewsCategory, Long>, QuerydslPredicateExecutor<NewsCategory> {
 
-    List<NewsCategory> findCategoryList(PageQueryUtil pageUtil);
+    int countAllNewsCategoryByIsDeleted(Byte isDeleted);
 
-    int getTotalCategories(PageQueryUtil pageUtil);
+    NewsCategory findNewsCategoryByCategoryId(Long categoryId);
 
-    int deleteByPrimaryKey(Long categoryId);
+    Page<NewsCategory> findAllByIsDeleted(Byte isDeleted, Pageable page);
 
-    int insert(NewsCategory record);
+    NewsCategory findNewsCategoryByCategoryName(String categoryName);
 
-    int insertSelective(NewsCategory record);
+    List<NewsCategory> findAllByIsDeleted(Byte isDeleted);
 
-    NewsCategory selectByPrimaryKey(Long categoryId);
-
-    NewsCategory selectByCategoryName(String categoryName);
-
-    int updateByPrimaryKeySelective(NewsCategory record);
-
-    int updateByPrimaryKey(NewsCategory record);
-
-    int deleteBatch(Integer[] ids);
 }

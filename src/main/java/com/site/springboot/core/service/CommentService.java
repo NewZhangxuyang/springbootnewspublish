@@ -27,7 +27,7 @@ public interface CommentService {
      * @param ids
      * @return
      */
-    Boolean checkDone(Integer[] ids);
+    Boolean checkDone(Long[] ids);
 
     /**
      * 批量删除
@@ -35,5 +35,5 @@ public interface CommentService {
      * @param ids
      * @return
      */
-    Boolean deleteBatch(Integer[] ids);
+    Boolean deleteBatch(Long[] ids);
 }
