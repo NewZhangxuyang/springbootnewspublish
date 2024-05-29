@@ -4,27 +4,39 @@ import cn.hutool.captcha.ShearCaptcha;
 import com.site.springboot.core.entity.News;
 import com.site.springboot.core.entity.NewsComment;
 import com.site.springboot.core.service.CommentService;
+import com.site.springboot.core.service.NewsIndexService;
 import com.site.springboot.core.service.NewsService;
-import com.site.springboot.core.util.AntiXssUtils;
-import com.site.springboot.core.util.Result;
-import com.site.springboot.core.util.ResultGenerator;
+import com.site.springboot.core.util.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-@Controller()
+
+@Controller
 @RequestMapping("/admin/detail")
-public class IndexController {
+public class NewsDetailController {
     @Resource
     private CommentService commentService;
     @Resource
     private NewsService newsService;
 
+    @Resource
+    private ExcelUtil excelUtil;
+
+
+    @Resource
+    private NewsIndexService indexService;
 
     /**
      * 详情页
@@ -37,11 +49,7 @@ public class IndexController {
         if (newsDetail != null) {
             request.setAttribute("newsDetail", newsDetail);
             request.setAttribute("pageName", "详情");
-            /*
-
-            浏览量加一
-
-            */
+            newsService.addViews(newsId);
             return "index/detail";
         } else {
             return "error/error_404";
@@ -50,14 +58,24 @@ public class IndexController {
     }
 
 
+    @GetMapping("/news/search")
+    @ResponseBody
+    public Result searchNews(@RequestParam String keyword, @RequestParam Map<String, Object> params) {
+        if (ObjectUtils.isEmpty(params.get("page")) || ObjectUtils.isEmpty(params.get("limit"))) {
+            return ResultGenerator.genFailResult("参数异常！");
+        }
+        PageQueryUtil pageUtil = new PageQueryUtil(params);
+        return ResultGenerator
+                .genSuccessResult(indexService.getNewsIndexByContent(keyword, pageUtil));
+    }
+
+
     @PostMapping("/news/export")
     @ResponseBody
-    public Result exportNews(@RequestBody Long[] ids) {
-        if (newsService.deleteBatch(ids)) {
-            return ResultGenerator.genSuccessResult();
-        } else {
-            return ResultGenerator.genFailResult("删除失败");
-        }
+    public Result exportNews(@RequestBody Long[] ids, HttpServletResponse response) {
+        List<News> news = newsService.getNewsByIds(ids);
+        excelUtil.newsExport(news, response);
+        return ResultGenerator.genSuccessResult();
     }
 
 
@@ -76,9 +94,7 @@ public class IndexController {
      */
     @PostMapping(value = "/news/comment")
     @ResponseBody
-    public Result comment(HttpServletRequest request, HttpSession session,
-                          @RequestParam Long newsId, @RequestParam String verifyCode,
-                          @RequestParam String commentator, @RequestParam String commentBody) {
+    public Result comment(HttpServletRequest request, HttpSession session, @RequestParam Long newsId, @RequestParam String verifyCode, @RequestParam String commentator, @RequestParam String commentBody) {
         if (!StringUtils.hasText(verifyCode)) {
             return ResultGenerator.genFailResult("验证码不能为空");
         }

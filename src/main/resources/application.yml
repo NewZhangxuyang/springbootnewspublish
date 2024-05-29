@@ -23,14 +23,30 @@ spring:
     database: mysql
   application:
     name: SpringNewsService
+  elasticsearch:
+    username: elastic
+    password: 000328
+    uris: http://localhost:9200
 logging:
   pattern:
     console: "%red(%d{yyyy-MM-dd HH:mm:ss.SSS}) %green([%thread]) %blue([%-5level]) %cyan(%logger{36}:%line) %msg%n"
   level:
+    tracer: trace
     sql: debug
     org:
+      elasticsearch:
+        client: trace
       hibernate:
         SQL: debug
-      springframework: debug
+      springframework:
+        data:
+          elasticsearch: trace
+    com:
+      site:
+        springboot:
+          core:
+            dao: debug
 server:
   port: 28083
+
+

@@ -10,11 +10,18 @@ $(function () {
             index: 'newsCoverImage',
             width: 120,
             formatter: coverImageFormatter
-        }, {label: '浏览量', name: 'newsViews', index: 'newsViews', width: 60},
-            {label: '赞数', name: 'newsViews', index: 'newsViews', width: 60},
-            {label: '详情', name: 'newsViews', index: 'newsViews', width: 60, formatter: detailFormatter},
-            {label: '点赞', name: 'newsViews', index: 'newsViews', width: 60, formatter: praiseFormatter},
-        ],
+        }, {label: '浏览量', name: 'newsViews', index: 'newsViews', width: 60}, {
+            label: '赞数',
+            name: 'newsViews',
+            index: 'newsViews',
+            width: 60
+        }, {
+            label: '详情',
+            name: 'newsViews',
+            index: 'newsViews',
+            width: 60,
+            formatter: detailFormatter
+        }, {label: '点赞', name: 'newsViews', index: 'newsViews', width: 60, formatter: praiseFormatter},],
         height: 700,
         rowNum: 10,
         rowList: [10, 20, 50],
@@ -64,6 +71,30 @@ function reload() {
     }).trigger("reloadGrid");
 }
 
+function reloadData() {
+    var page = $("#jqGrid").jqGrid('getGridParam', 'page');
+    var newUrl = '/admin/news/list';
+    $("#jqGrid").jqGrid('setGridParam'
+        , {url: newUrl, prmNames: {page: page, rows: "limit", order: "order"}}
+    ).trigger("reloadGrid");
+}
+
+
+function searchNews() {
+    var searchQuery = $("#search-input").val();
+    if (searchQuery == null) {
+        return;
+    }
+    console.log("搜索内容: " + searchQuery);
+    var newUrl = '/admin/detail/news/search?keyword=' + encodeURIComponent(searchQuery);
+    console.log("newUrl: " + newUrl);
+    var page = $("#jqGrid").jqGrid('getGridParam', 'page');
+    console.log("page: " + page);
+    $("#jqGrid").jqGrid('setGridParam'
+        , {url: newUrl, prmNames: {page: page, rows: "limit", order: "order"}}
+    ).trigger("reloadGrid");
+
+}
 
 function detailNews() {
     var data = getNowRow();
@@ -113,33 +144,24 @@ function getNowRow() {
 }
 
 
-function exportNews() {
+function exportExcel() {
     var ids = getSelectedRows();
     if (ids == null) {
         return;
     }
-    swal({
-        title: "确认弹框", text: "确认要导出数据吗?", icon: "success", buttons: true, dangerMode: true,
-    }).then((flag) => {
-        if (flag) {
-            $.ajax({
-                type: "POST",
-                url: "/admin/detail/news/export",
-                contentType: "application/json",
-                data: JSON.stringify(ids),
-                success: function (r) {
-                    if (r.resultCode == 200) {
-                        swal("导出成功", {
-                            icon: "success",
-                        });
-                        $("#jqGrid").trigger("reloadGrid");
-                    } else {
-                        swal(r.message, {
-                            icon: "error",
-                        });
-                    }
-                }
-            });
-        }
-    });
+    axios({
+        method: 'POST', url: "/admin/detail/news/export", timeout: 5000, headers: {
+            'Content-Type': 'application/json'
+        }, data: JSON.stringify(ids), responseType: 'blob'
+    }).then(function (res) {
+        var data = res.data;
+        var blob = new Blob([data], {type: 'application/octet-stream'});
+        var url = URL.createObjectURL(blob);
+        var exportLink = document.createElement('a');
+        exportLink.setAttribute("download", "export.xlsx");
+        exportLink.href = url;
+        document.body.appendChild(exportLink);
+        exportLink.click();
+    })
 }
+
