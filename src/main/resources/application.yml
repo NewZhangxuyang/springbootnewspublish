@@ -21,8 +21,28 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
     database: mysql
+  cloud:
+    nacos:
+      config:
+        enabled: false
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: com_news_zxy
+        group: news_work
+    loadbalancer:
+      nacos:
+        enabled: true
+      cache:
+        enabled: false
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: full
   application:
-    name: SpringNewsService
+    name: SpringNewsMainService
   elasticsearch:
     username: elastic
     password: 000328
@@ -41,6 +61,7 @@ logging:
       springframework:
         data:
           elasticsearch: trace
+        cloud: trace
     com:
       site:
         springboot:

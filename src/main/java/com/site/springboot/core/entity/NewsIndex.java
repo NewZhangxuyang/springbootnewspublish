@@ -38,6 +38,12 @@ public class NewsIndex implements java.io.Serializable {
     @Field(type = FieldType.Long)
     private Long newsCategoryId;
 
+
+    /**
+     * 分词器的细粒度，ik_max_word会将文本做最细粒度的拆分
+     * ik_smart会做最粗粒度的拆分
+     * 搜索时也要使用分词器拆分搜索条件
+     */
     @Field(type = FieldType.Text, analyzer = "ik_max_word")
     private String newsContent;
 
