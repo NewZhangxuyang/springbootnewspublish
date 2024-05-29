@@ -2,12 +2,10 @@ package com.site.springboot.core.controller.index;
 
 import cn.hutool.captcha.ShearCaptcha;
 import com.site.springboot.core.entity.News;
-import com.site.springboot.core.entity.NewsComment;
-import com.site.springboot.core.service.CommentService;
+import com.site.springboot.core.service.remote.CommentServiceRemote;
 import com.site.springboot.core.service.NewsIndexService;
 import com.site.springboot.core.service.NewsService;
 import com.site.springboot.core.util.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +23,10 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin/detail")
 public class NewsDetailController {
+
     @Resource
-    private CommentService commentService;
+    private CommentServiceRemote serviceRemote;
+
     @Resource
     private NewsService newsService;
 
@@ -40,7 +39,6 @@ public class NewsDetailController {
 
     /**
      * 详情页
-     *
      * @return
      */
     @GetMapping({"/{newsId}"})
@@ -94,11 +92,10 @@ public class NewsDetailController {
      */
     @PostMapping(value = "/news/comment")
     @ResponseBody
-    public Result comment(HttpServletRequest request, HttpSession session, @RequestParam Long newsId, @RequestParam String verifyCode, @RequestParam String commentator, @RequestParam String commentBody) {
+    public Result detailComment(HttpServletRequest request, HttpSession session, @RequestParam Long newsId, @RequestParam String verifyCode, @RequestParam String commentator, @RequestParam String commentBody) {
         if (!StringUtils.hasText(verifyCode)) {
             return ResultGenerator.genFailResult("验证码不能为空");
         }
-
         ShearCaptcha shearCaptcha = (ShearCaptcha) session.getAttribute("verifyCode");
         if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
             return ResultGenerator.genFailResult("验证码错误");
@@ -119,11 +116,7 @@ public class NewsDetailController {
         if (commentBody.trim().length() > 200) {
             return ResultGenerator.genFailResult("评论内容过长");
         }
-        NewsComment comment = new NewsComment();
-        comment.setNewsId(newsId);
-        comment.setCommentator(AntiXssUtils.cleanString(commentator));
-        comment.setCommentBody(AntiXssUtils.cleanString(commentBody));
-        session.removeAttribute("verifyCode");//留言成功后删除session中的验证码信息
-        return ResultGenerator.genSuccessResult(commentService.addComment(comment));
+        session.removeAttribute("verifyCode");//留言成功后删除session中的验证码信
+        return serviceRemote.comment(newsId, commentator, commentBody);
     }
 }
