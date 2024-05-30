@@ -39,6 +39,7 @@ public class NewsDetailController {
 
     /**
      * 详情页
+     *
      * @return
      */
     @GetMapping({"/{newsId}"})
@@ -79,12 +80,13 @@ public class NewsDetailController {
 
     @PostMapping("/news/praise")
     @ResponseBody
-    public Result praiseNews(@RequestBody Long[] ids) {
-        if (newsService.deleteBatch(ids)) {
-            return ResultGenerator.genSuccessResult();
-        } else {
-            return ResultGenerator.genFailResult("删除失败");
+    public Result praiseNews(@RequestBody Long id, HttpServletRequest request) {
+        String user = request.getSession().getAttribute("loginUserId").toString();
+        if (id < 0) {
+            return ResultGenerator.genFailResult("参数异常！");
         }
+        newsService.praiseNews(id,user);
+        return ResultGenerator.genSuccessResult("点赞成功");
     }
 
     /**

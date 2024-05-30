@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
 import java.util.Map;
 
 
@@ -50,11 +51,7 @@ public class NewsController {
 
     @PostMapping("/news/save")
     @ResponseBody
-    public Result save(@RequestParam("newsTitle") String newsTitle,
-                       @RequestParam("newsCategoryId") Long newsCategoryId,
-                       @RequestParam("newsContent") String newsContent,
-                       @RequestParam("newsCoverImage") String newsCoverImage,
-                       @RequestParam("newsStatus") Byte newsStatus) {
+    public Result save(@RequestParam("newsTitle") String newsTitle, @RequestParam("newsCategoryId") Long newsCategoryId, @RequestParam("newsContent") String newsContent, @RequestParam("newsCoverImage") String newsCoverImage, @RequestParam("newsStatus") Byte newsStatus) {
         if (!StringUtils.hasText(newsTitle)) {
             return ResultGenerator.genFailResult("请输入文章标题");
         }
@@ -76,11 +73,11 @@ public class NewsController {
         news.setNewsCoverImage(newsCoverImage);
         news.setNewsStatus(newsStatus);
         news.setNewsTitle(newsTitle);
-        String saveBlogResult = newsService.saveNews(news);
-        if ("success".equals(saveBlogResult)) {
+        News saveBlogResult = newsService.saveNews(news);
+        if (!ObjectUtils.isEmpty(saveBlogResult)) {
             return ResultGenerator.genSuccessResult("添加成功");
         } else {
-            return ResultGenerator.genFailResult(saveBlogResult);
+            return ResultGenerator.genFailResult("添加失败");
         }
     }
 
@@ -98,12 +95,7 @@ public class NewsController {
 
     @PostMapping("/news/update")
     @ResponseBody
-    public Result update(@RequestParam("newsId") Long newsId,
-                         @RequestParam("newsTitle") String newsTitle,
-                         @RequestParam("newsCategoryId") Long newsCategoryId,
-                         @RequestParam("newsContent") String newsContent,
-                         @RequestParam("newsCoverImage") String newsCoverImage,
-                         @RequestParam("newsStatus") Byte newsStatus) {
+    public Result update(@RequestParam("newsId") Long newsId, @RequestParam("newsTitle") String newsTitle, @RequestParam("newsCategoryId") Long newsCategoryId, @RequestParam("newsContent") String newsContent, @RequestParam("newsCoverImage") String newsCoverImage, @RequestParam("newsStatus") Byte newsStatus) {
         if (!StringUtils.hasText(newsTitle)) {
             return ResultGenerator.genFailResult("请输入文章标题");
         }
@@ -126,11 +118,11 @@ public class NewsController {
         news.setNewsCoverImage(newsCoverImage);
         news.setNewsStatus(newsStatus);
         news.setNewsTitle(newsTitle);
-        String updateResult = newsService.updateNews(news);
-        if ("success".equals(updateResult)) {
+        News updateResult = newsService.updateNews(news);
+        if (!ObjectUtils.isEmpty(updateResult)) {
             return ResultGenerator.genSuccessResult("修改成功");
         } else {
-            return ResultGenerator.genFailResult(updateResult);
+            return ResultGenerator.genFailResult("修改失败");
         }
     }
 
@@ -140,7 +132,7 @@ public class NewsController {
         if (ids.length < 1) {
             return ResultGenerator.genFailResult("参数异常！");
         }
-        if (newsService.deleteBatch(ids)) {
+        if (!newsService.deleteBatch(ids).isEmpty()) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("删除失败");

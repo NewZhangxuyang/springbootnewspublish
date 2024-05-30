@@ -12,8 +12,8 @@ $(function () {
             formatter: coverImageFormatter
         }, {label: '浏览量', name: 'newsViews', index: 'newsViews', width: 60}, {
             label: '赞数',
-            name: 'newsViews',
-            index: 'newsViews',
+            name: 'praiseCount',
+            index: 'praiseCount',
             width: 60
         }, {
             label: '详情',

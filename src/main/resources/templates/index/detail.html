@@ -62,6 +62,10 @@
                 </article>
                 <aside class="blog-rights clearfix">
                     <p> -- END -- </p>
+                    <button class="btn btn-clean-one" id="praise-button" th:value="${newsDetail.newsId}"
+                            onclick="praiseNews()"><i
+                            class="fa fa-send"></i>&nbsp;点赞
+                    </button>
                 </aside>
                 <aside class="create-comment" id="create-comment">
                     <hr>
@@ -75,7 +79,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="col-md-4">
-                                    <img alt="单击图片刷新！" class="pointer" style="margin-top: 15px; border-radius: 25px;"
+                                    <img alt="单击图片刷新！" class="pointer"
+                                         style="margin-top: 15px; border-radius: 25px;"
                                          th:src="@{/common/kaptcha}"
                                          onclick="this.src='/common/kaptcha?d='+new Date()*1">
                                 </div>
@@ -91,6 +96,7 @@
 
                         <div class="buttons clearfix">
                             <button type="submit" id="commentSubmit" class="btn btn-xlarge btn-clean-one">提交</button>
+
                         </div>
                     </form>
                 </aside>

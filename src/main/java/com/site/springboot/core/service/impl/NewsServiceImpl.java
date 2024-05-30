@@ -4,14 +4,17 @@ import com.site.springboot.core.config.Constants;
 import com.site.springboot.core.dao.ContentIndexMapper;
 import com.site.springboot.core.dao.NewsMapper;
 import com.site.springboot.core.entity.News;
-import com.site.springboot.core.entity.NewsComment;
 import com.site.springboot.core.entity.NewsIndex;
+import com.site.springboot.core.entity.vo.NewsVO;
 import com.site.springboot.core.service.NewsService;
 import com.site.springboot.core.util.PageQueryUtil;
 import com.site.springboot.core.util.PageResult;
+import com.site.springboot.core.util.RedisUtil;
+import com.site.springboot.core.util.annotation.RedisCacheDel;
+import com.site.springboot.core.util.annotation.RedisCacheGet;
+import com.site.springboot.core.util.annotation.RedisCacheSet;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,8 +30,13 @@ public class NewsServiceImpl implements NewsService {
     @Resource
     private ContentIndexMapper mapper;
 
+
+    @Resource
+    private RedisUtil redis;
+
+    @RedisCacheSet(retype = "single")
     @Override
-    public String saveNews(News news) {
+    public News saveNews(News news) {
         news.setIsDeleted(Constants.Delete_Flag_Exist);
         news.setNewsViews(0L);
         News newData = newsMapper.save(news);
@@ -36,12 +44,13 @@ public class NewsServiceImpl implements NewsService {
             NewsIndex newsIndex = new NewsIndex();
             BeanUtils.copyProperties(newData, newsIndex);
             mapper.save(newsIndex);
-            return "success";
+            return newData;
         }
-        return "保存失败";
+        return null;
     }
 
 
+    @RedisCacheGet(retype = "list")
     public List<News> getNewsByIds(Long[] ids) {
         return newsMapper.findAllById(Arrays.asList(ids));
     }
@@ -52,14 +61,16 @@ public class NewsServiceImpl implements NewsService {
         Pageable pageRequest = PageRequest.of(pageUtil.getPage() - 1, pageUtil.getLimit());
         List<News> news = newsMapper.findAllByIsDeleted(Constants.Delete_Flag_Exist, pageRequest).getContent();
         int total = newsMapper.countAllByIsDeleted(Constants.Delete_Flag_Exist);
-        return new PageResult(news, total, pageUtil.getLimit(), pageUtil.getPage());
+        List<NewsVO> newsVOS = packNewsVO(news);
+        return new PageResult(newsVOS, total, pageUtil.getLimit(), pageUtil.getPage());
     }
 
 
+    @RedisCacheDel(retype = "list")
     @Override
-    public Boolean deleteBatch(Long[] ids) {
+    public List<News> deleteBatch(Long[] ids) {
         if (ids.length < 1) {
-            return false;
+            return null;
         }
         List<NewsIndex> newsIndex = new ArrayList<>();
         List<News> lists = newsMapper.findAllById(Arrays.asList(ids)).stream().peek(news -> {
@@ -68,23 +79,27 @@ public class NewsServiceImpl implements NewsService {
             BeanUtils.copyProperties(news, index);
             newsIndex.add(index);
         }).toList();
-        if (!newsMapper.saveAll(lists).isEmpty()) {
+        List<News> newsList = newsMapper.saveAll(lists);
+        if (!newsList.isEmpty()) {
             mapper.deleteAll(newsIndex);
-            return true;
+            return newsList;
         }
-        return false;
+        return null;
     }
 
+    @RedisCacheGet(retype = "single")
     @Override
     public News queryNewsById(Long newsId) {
         return newsMapper.findNewByNewsId(newsId);
     }
 
+
+    @RedisCacheSet(retype = "single")
     @Override
-    public String updateNews(News news) {
+    public News updateNews(News news) {
         News newsForUpdate = newsMapper.findNewByNewsId(news.getNewsId());
         if (newsForUpdate == null) {
-            return "数据不存在";
+            return null;
         }
         news.setNewsCategoryId(news.getNewsCategoryId());
         news.setNewsContent(news.getNewsContent());
@@ -92,18 +107,23 @@ public class NewsServiceImpl implements NewsService {
         news.setNewsStatus(news.getNewsStatus());
         news.setNewsTitle(news.getNewsTitle());
         news.setUpdateTime(new Date());
-        if (!Objects.isNull(newsMapper.save(news).getNewsId())) {
+        news.setCreateTime(newsForUpdate.getCreateTime());
+        news.setIsDeleted(newsForUpdate.getIsDeleted());
+        news.setNewsViews(newsForUpdate.getNewsViews());
+        News updateNews = newsMapper.save(news);
+        if (!Objects.isNull(updateNews.getNewsId())) {
             NewsIndex newsIndex = new NewsIndex();
             BeanUtils.copyProperties(news, newsIndex);
             mapper.save(newsIndex);
-            return "success";
+            return updateNews;
         }
-        return "修改失败";
+        return null;
     }
 
 
+    @RedisCacheSet(retype = "single")
     @Override
-    public void addViews(Long newsId) {
+    public News addViews(Long newsId) {
         News news = newsMapper.findNewByNewsId(newsId);
         if (news != null) {
             news.setNewsViews(news.getNewsViews() + 1);
@@ -112,5 +132,30 @@ public class NewsServiceImpl implements NewsService {
             BeanUtils.copyProperties(news, newsIndex);
             mapper.save(newsIndex);
         }
+        return news;
+    }
+
+
+    public void praiseNews(Long newsId,String user) {
+        News news = newsMapper.findNewByNewsId(newsId);
+        /*拆成原子性*/
+        if (redis.hasKey("praise"+newsId)) {
+
+        }
+        redis.zAdd("praise", news.getNewsId().toString(), 1);
+    }
+
+
+    public List<NewsVO> packNewsVO(List<News> news) {
+        List<NewsVO> newsVOList = new ArrayList<>();
+        news.forEach(newItem -> {
+            NewsVO newsVO = new NewsVO();
+            BeanUtils.copyProperties(newItem, newsVO);
+            Double praiseDouble = redis.zScore("praise", newItem.getNewsId().toString());
+            newsVO.setPraiseCount(praiseDouble == null ? 0 : praiseDouble.intValue());
+            newsVOList.add(newsVO);
+        });
+        newsVOList.sort(Comparator.comparing(NewsVO::getPraiseCount).reversed());
+        return newsVOList;
     }
 }

@@ -50,28 +50,33 @@ spring:
     username: elastic
     password: 000328
     uris: http://localhost:9200
+  data:
+    redis:
+      username:
+      password:
+      host: 192.168.8.128
+      port: 6379
+
 logging:
   pattern:
     console: "%red(%d{yyyy-MM-dd HH:mm:ss.SSS}) %green([%thread]) %blue([%-5level]) %cyan(%logger{36}:%line) %msg%n"
   level:
+    # tracer为es的日志输出器
     tracer: trace
     sql: debug
     org:
-      elasticsearch:
-        client: trace
       hibernate:
         SQL: debug
       springframework:
-        data:
-          elasticsearch: trace
-        cloud:
-          openfeign: debug
-        web: trace
+        data: debug
+        cache: debug
+    #openfeign日志
     com:
       site:
         springboot:
           core:
-            dao: debug
+            service:
+              remote: debug
 server:
   port: 28083
 

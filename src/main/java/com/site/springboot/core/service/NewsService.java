@@ -7,14 +7,13 @@ import com.site.springboot.core.util.PageResult;
 import java.util.List;
 
 public interface NewsService {
-    String saveNews(News news);
+    News saveNews(News news);
 
     PageResult getNewsPage(PageQueryUtil pageUtil);
 
-    Boolean deleteBatch(Long[] ids);
+    List<News> deleteBatch(Long[] ids);
 
-    List<News> getNewsByIds(Long [] ids);
-
+    List<News> getNewsByIds(Long[] ids);
 
     /**
      * 根据id获取详情
@@ -30,15 +29,14 @@ public interface NewsService {
      * @param news
      * @return
      */
-    String updateNews(News news);
-
-
+    News updateNews(News news);
 
     /*
      *增加浏览量
      **/
+    News addViews(Long newsId);
 
-    void addViews(Long newsId);
 
+    void praiseNews(Long   newsId,String userName);
 
 }

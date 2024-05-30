@@ -8,6 +8,8 @@ import com.site.springboot.core.service.NewsIndexService;
 import com.site.springboot.core.service.NewsService;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +23,7 @@ import java.util.List;
 public class SpringTestApplication {
 
 
+    private static final Logger log = LoggerFactory.getLogger(SpringTestApplication.class);
     @Resource
     private NewsIndexService service;
 
@@ -72,8 +75,13 @@ public class SpringTestApplication {
         BeanUtils.copyProperties(news, index);
         index.setNewsTitle("测试测试测试测试测试测试测试");
         System.out.println(index);
-
         mapper.save(index);
     }
 
+
+    @Test
+    public void test2() {
+//        newsService.getNewsByIds(new Long[]{5L, 8L});
+        log.info(newsService.queryNewsById(5L).toString());
+    }
 }

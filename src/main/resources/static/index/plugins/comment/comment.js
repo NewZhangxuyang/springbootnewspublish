@@ -56,3 +56,27 @@ $('#commentSubmit').click(function () {
         }
     });
 });
+
+function praiseNews() {
+    var newsId = $('#praise-button').val();
+    console.log(newsId);
+    $.ajax({
+        type: "POST",
+        url: "/admin/detail/news/praise",
+        contentType: "application/json",
+        data: JSON.stringify(newsId),
+        success: function (r) {
+            if (r.resultCode == 200) {
+                swal("点赞成功", {
+                    icon: "success",
+                });
+            } else {
+                swal(r.message, {
+                    icon: "error",
+                });
+            }
+        }
+    });
+
+
+}
