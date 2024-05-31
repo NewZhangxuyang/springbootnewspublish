@@ -1,0 +1,84 @@
+spring:
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_news_system?useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8&autoReconnect=true&useSSL=false&allowMultiQueries=true
+    username: root
+    password: 000328
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: DatebookHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    database: mysql
+  cloud:
+    nacos:
+      config:
+        enabled: false
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: com_news_zxy
+        group: news_work
+    loadbalancer:
+      nacos:
+        enabled: true
+      cache:
+        enabled: false
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: full
+  application:
+    name: SpringNewsMainService
+  elasticsearch:
+    username: elastic
+    password: 000328
+    uris: http://localhost:9200
+  data:
+    redis:
+      username:
+      password:
+      host: 192.168.8.128
+      port: 6379
+
+logging:
+  pattern:
+    console: "%red(%d{yyyy-MM-dd HH:mm:ss.SSS}) %green([%thread]) %blue([%-5level]) %cyan(%logger{36}:%line) %msg%n"
+  level:
+    # tracer为es的日志输出器
+    tracer: trace
+    sql: debug
+    org:
+      hibernate:
+        SQL: debug
+      springframework:
+        web: debug
+        data: debug
+        cache: debug
+    #openfeign日志
+    com:
+      site:
+        springboot:
+          core:
+            service:
+              remote: debug
+server:
+  port: 28083
+
+
