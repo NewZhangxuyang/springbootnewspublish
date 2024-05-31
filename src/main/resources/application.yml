@@ -1,0 +1,62 @@
+server:
+  port: 10010
+spring:
+  main:
+    web-application-type: reactive
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: com_news_zxy
+        group: news_work
+      config:
+        enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes: # 路由配置
+        - id: expose-service
+          uri: lb://SpringNewsMainService
+          predicates:
+            - Path=/admin/index/**,common/**,/index/**,error/**,/admin/detail/**,/admin,/admin/news/list/**
+        - id: validate-service
+          uri: lb://SpringNewsMainService
+          predicates:
+            - Path=/admin/comment/**,/admin/news/**,/admin/categories/**,/admin/upload/file/**
+        - id: security-validate
+          uri: lb://SpringSecurityService
+          predicates:
+            - Path=/admin/validate/comment/**,/admin/validate/news/**,/admin/validate/categories/**,/admin/validate/upload/file/**
+          filters:
+            - RedirectFilter
+        - id: security-login
+          uri: lb://SpringSecurityService
+          predicates:
+            - Path=/token/**
+          filters:
+            - IndexRedirectFilter
+        - id: security
+          uri: lb://SpringSecurityService
+          predicates:
+            - Path=/login
+            - Method= GET
+    loadbalancer:
+      cache:
+        enabled: false
+      nacos:
+        enabled: true
+  application:
+    name: SpringNewsGateway
+logging:
+  level:
+    com:
+      site:
+        springboot:
+          core: debug
+    org:
+      springframework:
+        cloud: debug
+        web: debug
+
+
