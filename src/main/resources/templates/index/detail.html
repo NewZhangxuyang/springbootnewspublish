@@ -15,8 +15,16 @@
     <!--[if lt IE 9]>
     <script th:src="@{/index/js/respond.js}"></script>
     <![endif]-->
+    <style>
+        #praise-button:focus {
+            outline: none;
+            border: none;
+        }
+    </style>
+
 </head>
 <body>
+
 <header>
     <div class="widewrapper masthead">
         <div class="container">
@@ -62,9 +70,9 @@
                 </article>
                 <aside class="blog-rights clearfix">
                     <p> -- END -- </p>
-                    <button class="btn btn-clean-one" id="praise-button" th:value="${newsDetail.newsId}"
-                            onclick="praiseNews()"><i
-                            class="fa fa-send"></i>&nbsp;点赞
+                    <button class="btn btn-success" id="praise-button"
+                            th:value="${newsDetail.newsId}" th:data-praise="${praise}"
+                            onclick="praiseNews()">
                     </button>
                 </aside>
                 <aside class="create-comment" id="create-comment">
@@ -93,10 +101,8 @@
                         </div>
                         <textarea rows="10" name="commentBody" id="commentBody" placeholder="(*必填)请输入你的留言"
                                   class="form-control input-lg"></textarea>
-
                         <div class="buttons clearfix">
                             <button type="submit" id="commentSubmit" class="btn btn-xlarge btn-clean-one">提交</button>
-
                         </div>
                     </form>
                 </aside>

@@ -68,6 +68,7 @@ logging:
       hibernate:
         SQL: debug
       springframework:
+        web: debug
         data: debug
         cache: debug
     #openfeign日志

@@ -90,10 +90,10 @@ function searchNews() {
     console.log("newUrl: " + newUrl);
     var page = $("#jqGrid").jqGrid('getGridParam', 'page');
     console.log("page: " + page);
-    $("#jqGrid").jqGrid('setGridParam'
-        , {url: newUrl, prmNames: {page: page, rows: "limit", order: "order"}}
-    ).trigger("reloadGrid");
 
+    $("#jqGrid").jqGrid('setGridParam'
+        , {url: newUrl, prmNames: {page: page,rows: "limit", order: "order"}}
+    ).trigger("reloadGrid");
 }
 
 function detailNews() {

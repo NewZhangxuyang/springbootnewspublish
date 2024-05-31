@@ -1,6 +1,7 @@
 package com.site.springboot.core.controller.index;
 
 import cn.hutool.captcha.ShearCaptcha;
+import com.alibaba.fastjson.JSON;
 import com.site.springboot.core.entity.News;
 import com.site.springboot.core.service.remote.CommentServiceRemote;
 import com.site.springboot.core.service.NewsIndexService;
@@ -47,13 +48,15 @@ public class NewsDetailController {
         News newsDetail = newsService.queryNewsById(newsId);
         if (newsDetail != null) {
             request.setAttribute("newsDetail", newsDetail);
+            request.getSession().setAttribute("loginUserId", "zhangxuyang");
+            int isPraise = newsService.selectIsPraise(newsId, request.getSession().getAttribute("loginUserId").toString());
+            request.setAttribute("praise", isPraise);
             request.setAttribute("pageName", "详情");
             newsService.addViews(newsId);
             return "index/detail";
         } else {
             return "error/error_404";
         }
-
     }
 
 
@@ -64,8 +67,7 @@ public class NewsDetailController {
             return ResultGenerator.genFailResult("参数异常！");
         }
         PageQueryUtil pageUtil = new PageQueryUtil(params);
-        return ResultGenerator
-                .genSuccessResult(indexService.getNewsIndexByContent(keyword, pageUtil));
+        return ResultGenerator.genSuccessResult(indexService.getNewsIndexByContent(keyword, pageUtil));
     }
 
 
@@ -80,15 +82,33 @@ public class NewsDetailController {
 
     @PostMapping("/news/praise")
     @ResponseBody
-    public Result praiseNews(@RequestBody Long id, HttpServletRequest request) {
+    public Result praiseNews(@RequestBody String data, HttpServletRequest request) {
         String user = request.getSession().getAttribute("loginUserId").toString();
-        if (id < 0) {
+        Map map = JSON.parseObject(data, Map.class);
+        String newsId = map.get("newsId").toString();
+        String praised = map.get("praised").toString();
+        if (Long.parseLong(newsId) < 0 && user == null) {
             return ResultGenerator.genFailResult("参数异常！");
         }
-        newsService.praiseNews(id,user);
+        if (Integer.parseInt(praised) == 1) {
+            newsService.UnPraiseNews(Long.parseLong(newsId), user);
+            return ResultGenerator.genSuccessResult("取消点赞成功");
+        }
+        newsService.praiseNews(Long.parseLong(newsId), user);
         return ResultGenerator.genSuccessResult("点赞成功");
     }
 
+    @PostMapping("/news/totalPraise")
+    @ResponseBody
+    public List<String> getTotalPraiseUser(@RequestBody String data) {
+        return newsService.getTotalPraiseUser(Long.parseLong(data));
+    }
+
+    @PostMapping("/news/total")
+    @ResponseBody
+    public int getTotalPraise(@RequestBody String data) {
+        return newsService.getTotalPraiseCount(Long.parseLong(data));
+    }
     /**
      * 评论操作
      */

@@ -1,11 +1,11 @@
 package com.site.springboot.core.service.impl;
 
 import com.site.springboot.core.config.Constants;
+import com.site.springboot.core.dao.AdminMapper;
 import com.site.springboot.core.dao.ContentIndexMapper;
 import com.site.springboot.core.dao.NewsMapper;
 import com.site.springboot.core.entity.News;
 import com.site.springboot.core.entity.NewsIndex;
-import com.site.springboot.core.entity.vo.NewsVO;
 import com.site.springboot.core.service.NewsService;
 import com.site.springboot.core.util.PageQueryUtil;
 import com.site.springboot.core.util.PageResult;
@@ -15,6 +15,7 @@ import com.site.springboot.core.util.annotation.RedisCacheGet;
 import com.site.springboot.core.util.annotation.RedisCacheSet;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,11 @@ public class NewsServiceImpl implements NewsService {
 
     @Resource
     private RedisUtil redis;
+
+    @Resource
+    private AdminMapper admin;
+    @Autowired
+    private AdminMapper adminMapper;
 
     @RedisCacheSet(retype = "single")
     @Override
@@ -61,8 +67,7 @@ public class NewsServiceImpl implements NewsService {
         Pageable pageRequest = PageRequest.of(pageUtil.getPage() - 1, pageUtil.getLimit());
         List<News> news = newsMapper.findAllByIsDeleted(Constants.Delete_Flag_Exist, pageRequest).getContent();
         int total = newsMapper.countAllByIsDeleted(Constants.Delete_Flag_Exist);
-        List<NewsVO> newsVOS = packNewsVO(news);
-        return new PageResult(newsVOS, total, pageUtil.getLimit(), pageUtil.getPage());
+        return new PageResult(news, total, pageUtil.getLimit(), pageUtil.getPage());
     }
 
 
@@ -136,26 +141,53 @@ public class NewsServiceImpl implements NewsService {
     }
 
 
-    public void praiseNews(Long newsId,String user) {
-        News news = newsMapper.findNewByNewsId(newsId);
-        /*拆成原子性*/
-        if (redis.hasKey("praise"+newsId)) {
-
+    public Boolean praiseNews(Long newsId, String userName) {
+        String praiseKey = "praise" + newsId;
+        String praiseValue = userName + "::" + newsId;
+        String totalKey = "praiseTotal" + newsId;
+        if (redis.sHasKey(praiseKey, praiseValue)) {
+            return false;
         }
-        redis.zAdd("praise", news.getNewsId().toString(), 1);
+        redis.sSet(praiseKey, praiseValue);
+        redis.incr(totalKey, 1);
+        return true;
+    }
+
+    public int selectIsPraise(Long newsId, String userName) {
+        String praiseKey = "praise" + newsId;
+        String praiseValue = userName + "::" + newsId;
+        if (redis.hasKey(praiseKey) && redis.sHasKey(praiseKey, praiseValue)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
+    public Boolean UnPraiseNews(Long newsId, String userName) {
+        String praiseKey = "praise" + newsId;
+        String praiseValue = userName + "::" + newsId;
+        String totalKey = "praiseTotal" + newsId;
+        if (redis.hasKey(praiseKey) && redis.sHasKey(praiseKey, praiseValue)) {
+            redis.setRemove(praiseKey, praiseValue);
+            redis.decr(totalKey, 1);
+        }
+        return false;
+    }
+
+    public List<String> getTotalPraiseUser(Long newsId) {
+        String praiseKey = "praise" + newsId;
+        Set set = redis.sGet(praiseKey);
+        List<String> names = set.stream().map(o -> {
+            String[] strings = o.toString().split("::");
+            return strings[0];
+        }).toList();
+        return names;
+    }
+
+    public int getTotalPraiseCount(Long newsId) {
+        String totalKey = "praiseTotal" + newsId;
+        return redis.get(totalKey) == null ? 0 : Integer.parseInt(redis.get(totalKey).toString());
     }
 
 
-    public List<NewsVO> packNewsVO(List<News> news) {
-        List<NewsVO> newsVOList = new ArrayList<>();
-        news.forEach(newItem -> {
-            NewsVO newsVO = new NewsVO();
-            BeanUtils.copyProperties(newItem, newsVO);
-            Double praiseDouble = redis.zScore("praise", newItem.getNewsId().toString());
-            newsVO.setPraiseCount(praiseDouble == null ? 0 : praiseDouble.intValue());
-            newsVOList.add(newsVO);
-        });
-        newsVOList.sort(Comparator.comparing(NewsVO::getPraiseCount).reversed());
-        return newsVOList;
-    }
 }

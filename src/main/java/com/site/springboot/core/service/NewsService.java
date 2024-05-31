@@ -37,6 +37,15 @@ public interface NewsService {
     News addViews(Long newsId);
 
 
-    void praiseNews(Long   newsId,String userName);
+    Boolean praiseNews(Long newsId, String userName);
+
+
+    public int selectIsPraise(Long newsId, String userName);
+
+    Boolean UnPraiseNews(Long newsId, String user);
+
+    public List<String> getTotalPraiseUser(Long newsId);
+
+    public int getTotalPraiseCount(Long newsId);
 
 }

@@ -46,8 +46,7 @@ $('#commentSubmit').click(function () {
                 swal(result.message, {
                     icon: "error",
                 });
-            }
-            ;
+            };
         },
         error: function () {
             swal("操作失败", {
@@ -57,19 +56,52 @@ $('#commentSubmit').click(function () {
     });
 });
 
+
+$(document).ready(function () {
+    var praiseButton = $('#praise-button');
+    var praised = praiseButton.data("praise");
+    if (praised === 1) {
+        praiseButton.text("已点赞");
+    } else {
+        praiseButton.text("未点赞");
+    }
+});
+
+
 function praiseNews() {
-    var newsId = $('#praise-button').val();
-    console.log(newsId);
+    var praiseButton = $('#praise-button');
+    var newsId = praiseButton.val();
+    var praised = praiseButton.data('praise');
+    //做按钮反转
+    if (praised === 1) {
+        praiseButton.text("未点赞");
+        praiseButton.data('praise', 0);
+    } else {
+        praiseButton.text("已点赞");
+        praiseButton.data('praise', 1);
+    }
+    //  创建对象
+    var newsInfo = {
+        "newsId": newsId,
+        "praised": praised
+    };
+    console.log(newsInfo);
     $.ajax({
         type: "POST",
         url: "/admin/detail/news/praise",
         contentType: "application/json",
-        data: JSON.stringify(newsId),
+        data: JSON.stringify(newsInfo),
         success: function (r) {
             if (r.resultCode == 200) {
-                swal("点赞成功", {
-                    icon: "success",
-                });
+                if (praised === 1) {
+                    swal("取消点赞", {
+                        icon: "success",
+                    });
+                } else {
+                    swal("点赞成功", {
+                        icon: "success",
+                    });
+                }
             } else {
                 swal(r.message, {
                     icon: "error",
@@ -77,6 +109,4 @@ function praiseNews() {
             }
         }
     });
-
-
 }
